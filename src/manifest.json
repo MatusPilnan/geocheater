@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "icons": { "128": "images/icon.png" },
+  "action": {
+    "default_icon": "images/icon.png",
+    "default_popup": "html/popup.html"
+  },
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": [ "http://*/*", "https://*/*" ],
+    "js": [ "js/content.js" ]
+  }],
+  "options_page": "html/options.html",
+  "devtools_page": "html/devtools.html",
+  "permissions": ["activeTab", "cookies"],
+  "host_permissions": [ "*://*.geoguessr.com/*" ],
+  "web_accessible_resources": [{
+    "resources": ["js/*", "html/*", "css/*", "images/*" ],
+    "matches": [ "http://*/*", "https://*/*" ],
+    "extension_ids": []
+  }],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "name": "GeoCheatR",
+  "version": "0.1",
+  "description": "GeoGuessr + 10MinuteMail = <3!"
+}
