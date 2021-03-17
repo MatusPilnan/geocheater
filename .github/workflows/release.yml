@@ -16,12 +16,12 @@ jobs:
         run: npm install
       - name: Build
         run: |
-          mkdir -p build/prod
+          mkdir -p build-prod
           npm run build
           ls build/prod -al
       - uses: papeloto/action-zip@v1
         with:
-          files: ./build/
+          files: ./build-prod/
           dest: geocheater.zip
       - name: Upload Release Asset
         id: upload-release-asset 

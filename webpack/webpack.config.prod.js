@@ -13,7 +13,7 @@ const appName = `${pkg.name}-${pkg.version}`;
 
 module.exports = _.merge({}, config, {
   output: {
-    path: path.resolve(__dirname, '../build/prod'),
+    path: path.resolve(__dirname, '../build-prod'),
   },
 
   // devtool: 'eval',
