@@ -20,7 +20,7 @@ jobs:
           npm run build
       - uses: papeloto/action-zip@v1
         with:
-          files: ./bulid/prod
+          files: ./bulid/prod/
           dest: geocheater.zip
       - name: Upload Release Asset
         id: upload-release-asset 
