@@ -2,7 +2,7 @@ name: Release Chrome extension ZIP
 
 on:
   release:
-    types: [published]
+    types: [published, edited]
 
 jobs:
   build:
@@ -18,9 +18,10 @@ jobs:
         run: |
           mkdir -p build/prod
           npm run build
+          ls build/prod -al
       - uses: papeloto/action-zip@v1
         with:
-          files: ./bulid/prod/
+          files: bulid/prod/
           dest: geocheater.zip
       - name: Upload Release Asset
         id: upload-release-asset 
