@@ -19,10 +19,9 @@ jobs:
           mkdir -p build/prod
           npm run build
           ls build/prod -al
-          cd build
       - uses: papeloto/action-zip@v1
         with:
-          files: ./prod/
+          files: ./build/
           dest: geocheater.zip
       - name: Upload Release Asset
         id: upload-release-asset 
