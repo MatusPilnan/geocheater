@@ -12,7 +12,13 @@ class TemporaryMail {
   }
 
   async getAddress() {
-    return (await (await fetch(this.endpoints.address)).json())['address']
+    const address = (await (await fetch(this.endpoints.address)).json())['address']
+    chrome.storage.local.get("geocheaterLastEmail", ({geocheaterLastEmail: lastEmail}) => {
+      if (!lastEmail || address !== lastEmail.address) {
+        chrome.storage.local.set({"geocheaterLastEmail": {address, expires: Date.now() + 1000 * 60 * 10}})
+      }
+    })
+    return address
   }
 
   async getMessageCount() {
