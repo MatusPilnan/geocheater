@@ -1,5 +1,6 @@
 const newGame = document.getElementById('newGame')
 const status = document.getElementById('status')
+const forceNewMail = document.getElementById('forceNewMail')
 
 let geoGuessrTab = undefined
 
@@ -13,7 +14,7 @@ chrome.tabs.query({url: '*://*.geoguessr.com/*'}, (tabs) => {
 });
 
 newGame.addEventListener('click', async () => {
-  chrome.runtime.sendMessage({geoGuessrTab}, function(response) {
+  chrome.runtime.sendMessage({geoGuessrTab, forceNewMail: forceNewMail.checked}, function(response) {
     console.log(response);
   });
 

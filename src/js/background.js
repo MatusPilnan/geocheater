@@ -129,7 +129,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     await update("Reloading...")
     await chrome.tabs.reload(geoGuessrTab.id, {bypassCache: true})
     await update("Retrieving e-mail address...")
-    // await chrome.cookies.remove({name: "JSESSIONID", url: "https://10minutemail.com/"})
+
+    if (request.forceNewMail) {
+      await chrome.cookies.remove({name: "JSESSIONID", url: "https://10minutemail.com/"})
+    }
 
     try {
       const mailAddress = await mail.getAddress()
@@ -143,7 +146,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       await update(`Registration link: ${registrationLink} - ${geoGuessrTab.id}`)
       await chrome.tabs.update(geoGuessrTab.id, {active: true, url: registrationLink});
       let retries = 0
-      while (!(await chrome.tabs.get(geoGuessrTab.id)).url.includes("https://www.geoguessr.com/profile/set-password")) {
+      let url = (await chrome.tabs.get(geoGuessrTab.id)).url
+      while (!url.includes("https://www.geoguessr.com/profile/set-password")) {
         await update(`Waiting for set-password redirect (${geoGuessrTab.url}) (${retries})`)
         await new Promise(r => setTimeout(r, 1000));
         retries++;
@@ -152,8 +156,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           resolve()
           return
         }
+        url = (await chrome.tabs.get(geoGuessrTab.id)).url
       }
-      const token = geoGuessrTab.url.substring(geoGuessrTab.url.lastIndexOf('/') + 1)
+      const token = url.substring(url.lastIndexOf('/') + 1)
       await update(`Got token: ${token}`)
       await update(`Registering with password: ${defaultPassword}`)
       const passwordResponse = await guessr.setPassword(token, defaultPassword)
