@@ -23,22 +23,9 @@ class TemporaryMail {
     return (await (await fetch(this.endpoints.msgsAfter + n)).json())
   }
 
-  listenForMessages(onGeoGuessrMail = (list) => {}) {
-    return window.setInterval(() => {
-      this.getMessageAfter().then((messages) => {
-        const fromGG = messages.filter((mail) => {return mail.subject === "GeoGuessr - Complete your registration"})
-        if (fromGG.length > 0) {
-          onGeoGuessrMail(fromGG)
-        } else {
-          console.log("No mail.")
-        }
-      })
-    }, this.frequency)
-  }
-
-  async waitForMessage() {
+  async waitForMessage(after = 0) {
     while (true) {
-      const messages = await this.getMessageAfter();
+      const messages = await this.getMessageAfter(after);
       const fromGG = messages.filter((mail) => {return mail.subject === "GeoGuessr - Complete your registration"})
       if (fromGG.length > 0) {
         return fromGG

@@ -12,7 +12,7 @@
   }],
   "options_page": "html/options.html",
   "devtools_page": "html/devtools.html",
-  "permissions": ["activeTab", "cookies"],
+  "permissions": ["activeTab", "cookies", "scripting", "storage", "tabs"],
   "host_permissions": [ "*://*.geoguessr.com/*", "*://10minutemail.com/*" ],
   "web_accessible_resources": [{
     "resources": ["js/*", "html/*", "css/*", "images/*" ],

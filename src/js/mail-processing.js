@@ -1,11 +1,8 @@
-const $ = require('jquery')
-
 function processMail(mail) {
   const content = mail.bodyHtmlContent
-  const mailDom = $(content, document)
-  const registrationLink = mailDom.find('a:contains("Complete registration")')[0].href
-  console.log(registrationLink)
-  return registrationLink
+  const anchor = content.match(/<a(.|\n|\r)*?Complete registration(.|\n|\r)*?<\/a>/)[0]
+  console.log(anchor)
+  return anchor.match(/href="(.*?)"/)[1].toString()
 }
 
 module.exports = {
