@@ -9,10 +9,10 @@ function updateEmail({geocheaterLastEmail: email}) {
   console.log(email)
   if (remaining >= 0) {
     currentEmail.innerText = `Current e-mail: ${email.address}`
-    countdown.innerText = `${Math.floor(remaining / 60)}:${remaining % 60}`
+    countdown.innerText = `New e-mail in: ${Math.floor(remaining / 60)}:${remaining % 60}`
   } else {
     currentEmail.innerText = 'No e-mail active.'
-    countdown.parentElement.style.display = 'none'
+    countdown.style.display = 'none'
   }
 }
 
