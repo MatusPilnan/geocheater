@@ -97,20 +97,48 @@ async function updateLoadingOverlay(tabId, status) {
 }
 
 const defaultPassword = "Papryka czerwona";
+// #__next > div > main > div.result > div.result__left > div.interstitial-message > div.margin--top > div
+//#__next > div > main > div.result > div.result__left > div.interstitial-message > div.margin--top > div > button
+
+
+function onNavigationChange(tabId, details, tab) {
+  chrome.storage.local.get("geocheaterTabId", ({geocheaterTabId: geoGuessrTabId}) => {
+    if (tabId === geoGuessrTabId) {
+      if (details.url && details.url.includes("https://www.geoguessr.com/game")) {
+        console.log('juchuuu')
+        chrome.storage.local.get("geocheaterLastEmail", ({geocheaterLastEmail: lastEmail}) => {
+          if (lastEmail) {
+            chrome.storage.local.get("geocheaterEmails", ({geocheaterEmails}) => {
+              geocheaterEmails = geocheaterEmails || {}
+              geocheaterEmails[lastEmail.address] = {nextGame: Date.now() + 1000 * 60 * 60 * 24}
+              console.log('Starting game now. ', geocheaterEmails)
+              chrome.storage.local.set({geocheaterEmails})
+            })
+          }
+        })
+      }
+    }
+  })
+}
+
+chrome.tabs.onUpdated.addListener(onNavigationChange)
+
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   new Promise(async (resolve) => {
     const mail = new TemporaryMail();
     const guessr = new Guessr();
-    var geoGuessrTab = request.geoGuessrTab
+
+    let geoGuessrTab = request.geoGuessrTab
 
     console.log(sender.tab ?
       "from a content script:" + sender.tab.url :
       "from the extension");
-
     if (!geoGuessrTab) {
       geoGuessrTab = await chrome.tabs.create({url: "https://www.geoguessr.com", active: false})
     }
+
+    chrome.storage.local.set({geocheaterTabId: geoGuessrTab.id})
 
     const update = async (status) => {
       info(status)
@@ -135,34 +163,42 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
 
     try {
-      const mailAddress = await mail.getAddress()
+      const [mailAddress, newAccount] = await mail.getAddress(request.forceNewMail)
       const mailCount = await mail.getMessageCount()
       await update(`Got e-mail address: ${mailAddress} (${mailCount}). Signing up...`)
       const signupResponse = await guessr.signup(mailAddress);
       await update(`Signed up with nick: ${signupResponse.nick}. Waiting for e-mail...`)
-      const fromGG = await mail.waitForMessage(mailCount)
-      await update(`Got message: ${fromGG[0].subject}`)
-      const registrationLink = processMail(fromGG[fromGG.length - 1])
-      await update(`Registration link: ${registrationLink} - ${geoGuessrTab.id}`)
-      await chrome.tabs.update(geoGuessrTab.id, {active: true, url: registrationLink});
-      let retries = 0
-      let url = (await chrome.tabs.get(geoGuessrTab.id)).url
-      while (!url.includes("https://www.geoguessr.com/profile/set-password")) {
-        await update(`Waiting for set-password redirect (${geoGuessrTab.url}) (${retries})`)
-        await new Promise(r => setTimeout(r, 1000));
-        retries++;
-        if (retries >= 30) {
-          await update(undefined)
-          resolve()
-          return
+      console.log(signupResponse)
+      if (newAccount || signupResponse.nick !== undefined) {
+        const fromGG = await mail.waitForMessage(mailCount)
+        await update(`Got message: ${fromGG[0].subject}`)
+        const registrationLink = processMail(fromGG[fromGG.length - 1])
+        await update(`Registration link: ${registrationLink} - ${geoGuessrTab.id}`)
+        await chrome.tabs.update(geoGuessrTab.id, {active: true, url: registrationLink});
+        await update(`Setting password: ${defaultPassword}`)
+        let retries = 0
+        let url = (await chrome.tabs.get(geoGuessrTab.id)).url
+        while (!url.includes("https://www.geoguessr.com/profile/set-password")) {
+          await update(`Waiting for set-password redirect (${geoGuessrTab.url}) (${retries})`)
+          await new Promise(r => setTimeout(r, 1000));
+          retries++;
+          if (retries >= 30) {
+            await update(undefined)
+            resolve()
+            return
+          }
+          url = (await chrome.tabs.get(geoGuessrTab.id)).url
         }
-        url = (await chrome.tabs.get(geoGuessrTab.id)).url
+        const token = url.substring(url.lastIndexOf('/') + 1)
+        await update(`Got token: ${token}`)
+        await update(`Registering with password: ${defaultPassword}`)
+        const passwordResponse = await guessr.setPassword(token, defaultPassword)
+        await update(`Success! Password: ${defaultPassword}`)
+      } else {
+        await update(`Signing into existing account: ${mailAddress}`)
+        const signinResponse = await guessr.signin(mailAddress, defaultPassword)
+        console.log(signinResponse)
       }
-      const token = url.substring(url.lastIndexOf('/') + 1)
-      await update(`Got token: ${token}`)
-      await update(`Registering with password: ${defaultPassword}`)
-      const passwordResponse = await guessr.setPassword(token, defaultPassword)
-      await update(`Success! Password: ${defaultPassword}`)
       await chrome.tabs.update(geoGuessrTab.id, {active: true, url: "https://www.geoguessr.com"});
     } catch (e) {
       await update(e.toString())

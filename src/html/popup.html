@@ -4,15 +4,34 @@
     <title>Popup</title>
     <link rel="stylesheet" type="text/css" href="../css/common.css">
 </head>
-<body>
+<body class="popup">
 <h1>GeoCheater</h1>
+<div class="actions">
+    <button id="newGame">New game!</button>
+    <label>
+        <input type="checkbox" id="forceNewMail">
+        Force new e-mail
+    </label>
+</div>
+
+<h2>Accounts</h2>
+<div class="accountsWrapper">
+    <table>
+        <thead>
+        <tr>
+            <td>Email</td>
+            <td class="remaining">Next game</td>
+        </tr>
+        </thead>
+        <tbody id="accountList" class="accounts">
+        </tbody>
+    </table>
+</div>
+<p>Default password: <code>Papryka czerwona</code></p>
+
+<h2>Info</h2>
 <p id="currentEmail"></p>
 <p id="countdown"></p>
-<label>
-    <input type="checkbox" id="forceNewMail">
-    Force new e-mail
-</label>
-<button id="newGame">New game!</button>
 <p id="status"></p>
 <script src="../js/popup.js" type="text/javascript"></script>
 </body>
