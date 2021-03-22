@@ -105,7 +105,6 @@ function onNavigationChange(tabId, details, tab) {
   chrome.storage.local.get("geocheaterTabId", ({geocheaterTabId: geoGuessrTabId}) => {
     if (tabId === geoGuessrTabId) {
       if (details.url && details.url.includes("https://www.geoguessr.com/game")) {
-        console.log('juchuuu')
         chrome.storage.local.get("geocheaterLastEmail", ({geocheaterLastEmail: lastEmail}) => {
           if (lastEmail) {
             chrome.storage.local.get("geocheaterEmails", ({geocheaterEmails}) => {
@@ -116,6 +115,9 @@ function onNavigationChange(tabId, details, tab) {
             })
           }
         })
+      } else if (details.url && details.url.includes("https://www.geoguessr.com/signout")) {
+        console.log("signout - clearing storage")
+        chrome.storage.local.remove("geocheaterTabId")
       }
     }
   })
